@@ -250,28 +250,22 @@ st.markdown("""
 
 # Function to load and process data
 @st.cache_data
-def load_data():
-    try:
-        # Try to load from the /data directory (relative path)
-        df = pd.read_csv("data/transactions.csv")
+def load_data(uploaded_file=None):
+    if uploaded_file is not None:
+        # Read the uploaded file
+        df = pd.read_csv(uploaded_file)
         return df
-    except FileNotFoundError:
-        try:
-            # Try with absolute path
-            df = pd.read_csv("/data/transactions.csv")
-            return df
-        except FileNotFoundError:
-            # If data file doesn't exist yet, return a dummy dataframe
-            st.error("Transaction data file not found. Please ensure the CSV file is in the correct location.")
-            # Create a dummy dataframe with the expected columns
-            columns = [
-                "Transaction_ID", "Customer_ID", "Name", "Age", "Income", "Credit_Score", 
-                "Account_Type", "Existing_Loan", "EMI_Amount", "Credit_Utilization", 
-                "Default_History", "Transaction_Date", "Transaction_Amount", "Transaction_Type", 
-                "Description", "Unusual_Transaction", "Transaction_Location", 
-                "Bank_Ledger_Amount", "Reconciliation_Status", "Bulk_Payment_Type"
-            ]
-            return pd.DataFrame(columns=columns)
+    else:
+        # Return an empty dataframe with expected columns
+        st.error("Please upload a transaction CSV file to continue.")
+        columns = [
+            "Transaction_ID", "Customer_ID", "Name", "Age", "Income", "Credit_Score", 
+            "Account_Type", "Existing_Loan", "EMI_Amount", "Credit_Utilization", 
+            "Default_History", "Transaction_Date", "Transaction_Amount", "Transaction_Type", 
+            "Description", "Unusual_Transaction", "Transaction_Location", 
+            "Bank_Ledger_Amount", "Reconciliation_Status", "Bulk_Payment_Type"
+        ]
+        return pd.DataFrame(columns=columns)
 
 def search_data(df, search_term, search_by):
     """
@@ -605,8 +599,11 @@ def main():
     </div>
     """, unsafe_allow_html=True)
     
-    # Load data
-    df = load_data()
+    # Add file uploader
+    uploaded_file = st.file_uploader("Upload transaction CSV file", type=["csv"])
+    
+    # Load data with the uploaded file
+    df = load_data(uploaded_file)
     
     # Search and filter section
     #st.markdown('<div class="search-container">', unsafe_allow_html=True)
