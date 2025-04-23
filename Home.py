@@ -11,11 +11,16 @@ st.set_page_config(
 # Add custom CSS
 st.markdown("""
 <style>
+    a {
+        text-decoration: none !important;
+    }
     .main-header {
         font-size: 3.2rem;
         font-weight: 700;
         color: #0A2559;
         margin-bottom: 1rem;
+        display: flex;
+        justify-content: center;
     }
     
     .tagline {
@@ -188,75 +193,61 @@ def main():
     st.markdown('<div class="section-header">Advanced Banking Solutions</div>', unsafe_allow_html=True)
     
     # First row of features
-    col1, col2, col3 = st.columns(3)
+    col1, col2 = st.columns(2)
     
     with col1:
         st.markdown('''
-        <div class="feature-box">
-            <div class="feature-icon">📊</div>
-            <div class="feature-title">Automated Report Generation</div>
-            <div class="feature-desc">
-                Generate comprehensive financial reports with AI-powered insights, tailored recommendations, and loan eligibility analysis for your customers.
+        <a href="Transactions" target="_self">
+            <div class="feature-box">
+                <div class="feature-icon">📊</div>
+                <div class="feature-title">Automated Report Generation</div>
+                <div class="feature-desc">
+                    Generate comprehensive financial reports with AI-powered insights, tailored recommendations, and loan eligibility analysis for your customers.
+                </div>
             </div>
-        </div>
+        </a>
         ''', unsafe_allow_html=True)
     
     with col2:
         st.markdown('''
-        <div class="feature-box">
-            <div class="feature-icon">🧮</div>
-            <div class="feature-title">Credit Risk Analysis</div>
-            <div class="feature-desc">
-                Leverage advanced AI algorithms to assess credit scores with precision and predict potential loan defaults before they occur.
+        <a href="Credit_Risk_Analysis" target="_self">
+            <div class="feature-box">
+                <div class="feature-icon">🧮</div>
+                <div class="feature-title">Credit Risk Analysis</div>
+                <div class="feature-desc">
+                    Leverage advanced AI algorithms to assess credit scores with precision and predict potential loan defaults before they occur.
+                </div>
             </div>
-        </div>
-        ''', unsafe_allow_html=True)
-        
-    with col3:
-        st.markdown('''
-        <div class="feature-box">
-            <div class="feature-icon">🛡️</div>
-            <div class="feature-title">Real-Time Fraud Detection</div>
-            <div class="feature-desc">
-                Identify and flag suspicious transactions instantly based on sophisticated pattern recognition and customer behavioral analysis.
-            </div>
-        </div>
+        </a>
         ''', unsafe_allow_html=True)
     
     # Second row of features
-    col1, col2, col3 = st.columns(3)
+    col1, col2 = st.columns(2)
     
     with col1:
         st.markdown('''
-        <div class="feature-box">
-            <div class="feature-icon">💸</div>
-            <div class="feature-title">Bulk Payment Processing</div>
-            <div class="feature-desc">
-                Streamline high-volume transactions with automated processing for salary disbursements, vendor payments, and dividend distributions.
+        <a href="Bulk_Processing" target="_self">
+            <div class="feature-box">
+                <div class="feature-icon">💸</div>
+                <div class="feature-title">Bulk Payment Processing</div>
+                <div class="feature-desc">
+                    Streamline high-volume transactions with automated processing for salary disbursements, vendor payments, and dividend distributions.
+                </div>
             </div>
-        </div>
-        ''', unsafe_allow_html=True)
-    
-    with col2:
-        st.markdown('''
-        <div class="feature-box">
-            <div class="feature-icon">🤖</div>
-            <div class="feature-title">AI Chatbots for Banker Support</div>
-            <div class="feature-desc">
-                Empower your banking staff with intelligent assistants that provide instant answers to queries about policies, rates, and procedures.
-            </div>
-        </div>
+         </a>
         ''', unsafe_allow_html=True)
         
-    with col3:
+    with col2:
         st.markdown('''
-        <div class="feature-box">
-            <div class="feature-icon">📑</div>
-            <div class="feature-title">Automated Account Reconciliation</div>
-            <div class="feature-desc">
-                Match transaction records from different sources with pinpoint accuracy, drastically reducing manual effort and human error.
+        <a href="Account_Reconciliation" target="_self">
+            <div class="feature-box">
+                <div class="feature-icon">📑</div>
+                <div class="feature-title">Automated Account Reconciliation</div>
+                <div class="feature-desc">
+                    Match transaction records from different sources with pinpoint accuracy, drastically reducing manual effort and human error.
+                </div>
             </div>
-        </div>
+        </a>
         ''', unsafe_allow_html=True)
     
     # CTA Section

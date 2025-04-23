@@ -23,6 +23,15 @@ st.markdown("""
         border-bottom: 2px solid #E2E8F0;
     }
     
+    /* Header styling */
+    .header-container {
+        background-color: #1e3a8a;
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        color: white;
+        margin-bottom: 1rem;
+    }
+    
     .welcome-banner {
         background: linear-gradient(to right, #0A2559, #183C7E);
         color: white;
@@ -205,18 +214,6 @@ def generate_fraud_data():
     
     return df
 
-def generate_reconciliation_data():
-    # Create sample reconciliation status data
-    status = ['Matched', 'Unmatched', 'In Progress', 'Needs Review']
-    values = [78, 8, 10, 4]
-    
-    df = pd.DataFrame({
-        'status': status,
-        'percentage': values
-    })
-    
-    return df
-
 def generate_credit_data():
     # Create sample credit score distribution
     score_ranges = ['300-500', '501-600', '601-700', '701-800', '801-850']
@@ -232,6 +229,11 @@ def generate_credit_data():
 def main():
     # Main content
     st.markdown('<div class="dashboard-header">Banking Operations Dashboard</div>', unsafe_allow_html=True)
+    # st.markdown("""
+    #             <div class="header-container">
+    #                 <h1>Banking Operations Dashboard</h1>
+    #             </div>
+    #             """, unsafe_allow_html=True)
     
     # Welcome banner
     st.markdown("""
@@ -259,7 +261,7 @@ def main():
         st.markdown("""
         <div class="metric-card">
             <div class="metric-label">RECONCILIATION ACCURACY</div>
-            <div class="metric-value">98.5%</div>
+            <div class="metric-value">99.8%</div>
             <div class="metric-delta positive-delta">↑ 0.3% from last week</div>
         </div>
         """, unsafe_allow_html=True)
@@ -277,7 +279,7 @@ def main():
         st.markdown("""
         <div class="metric-card">
             <div class="metric-label">FRAUD ALERTS</div>
-            <div class="metric-value">7</div>
+            <div class="metric-value">1</div>
             <div class="metric-delta neutral-delta">No change from yesterday</div>
         </div>
         """, unsafe_allow_html=True)
@@ -288,7 +290,7 @@ def main():
     transaction_data = generate_transaction_data()
     
     with st.container():
-        st.markdown('<div class="chart-container">', unsafe_allow_html=True)
+        #st.markdown('<div class="chart-container">', unsafe_allow_html=True)
         st.markdown('<div class="chart-title">Daily Transaction Volume</div>', unsafe_allow_html=True)
         
         fig = px.line(
@@ -311,93 +313,55 @@ def main():
         st.plotly_chart(fig, use_container_width=True)
         st.markdown('</div>', unsafe_allow_html=True)
     
-    # Main modules
-    col1, col2 = st.columns(2)
     
-    with col1:
-        # Reconciliation module
-        st.markdown('<div class="module-card">', unsafe_allow_html=True)
-        st.markdown('<div class="module-title">📑 Account Reconciliation</div>', unsafe_allow_html=True)
-        
-        reconciliation_data = generate_reconciliation_data()
-        fig = px.pie(
-            reconciliation_data,
-            values='percentage',
-            names='status',
-            hole=0.5,
-            color_discrete_sequence=['#0A2559', '#F56565', '#ECC94B', '#718096']
-        )
-        
-        fig.update_layout(
-            margin=dict(l=20, r=20, t=20, b=20),
-            height=250,
-            showlegend=True,
-            legend=dict(orientation='h', yanchor='bottom', y=-0.3, xanchor='center', x=0.5)
-        )
-        
-        fig.update_traces(textinfo='percent+label')
-        
-        st.plotly_chart(fig, use_container_width=True)
-        
-        # File upload placeholders
-        col_a, col_b = st.columns(2)
-        with col_a:
-            st.file_uploader("Upload Bank Ledger", type=["csv", "xlsx"])
-        with col_b:
-            st.file_uploader("Upload Customer Records", type=["csv", "xlsx"])
-        
-        st.button("Begin Reconciliation Process", use_container_width=True)
-        st.markdown('</div>', unsafe_allow_html=True)
+    # Fraud Detection module
+    #st.markdown('<div class="module-card">', unsafe_allow_html=True)
+    st.markdown('<div class="module-title">🛡️ Fraud Detection Overview</div>', unsafe_allow_html=True)
     
-    with col2:
-        # Fraud Detection module
-        st.markdown('<div class="module-card">', unsafe_allow_html=True)
-        st.markdown('<div class="module-title">🛡️ Fraud Detection Overview</div>', unsafe_allow_html=True)
-        
-        fraud_data = generate_fraud_data()
-        
-        fig = go.Figure()
-        fig.add_trace(go.Bar(
-            x=fraud_data['category'],
-            y=fraud_data['detected'],
-            name='Detected Fraud',
-            marker_color='#0A2559'
-        ))
-        
-        fig.add_trace(go.Bar(
-            x=fraud_data['category'],
-            y=fraud_data['false_positives'],
-            name='False Positives',
-            marker_color='#F56565'
-        ))
-        
-        fig.update_layout(
-            barmode='group',
-            margin=dict(l=20, r=20, t=20, b=20),
-            height=250,
-            legend=dict(orientation='h', yanchor='bottom', y=-0.3, xanchor='center', x=0.5),
-            xaxis=dict(showgrid=False),
-            yaxis=dict(showgrid=True, gridcolor='#E2E8F0')
-        )
-        
-        st.plotly_chart(fig, use_container_width=True)
-        
-        # Action buttons for fraud detection
-        col_a, col_b, col_c = st.columns(3)
-        with col_a:
-            st.button("Review Alerts", use_container_width=True)
-        with col_b:
-            st.button("Update Rules", use_container_width=True)
-        with col_c:
-            st.button("Export Report", use_container_width=True)
-        
-        st.markdown('</div>', unsafe_allow_html=True)
+    fraud_data = generate_fraud_data()
+    
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        x=fraud_data['category'],
+        y=fraud_data['detected'],
+        name='Detected Fraud',
+        marker_color='#0A2559'
+    ))
+    
+    fig.add_trace(go.Bar(
+        x=fraud_data['category'],
+        y=fraud_data['false_positives'],
+        name='False Positives',
+        marker_color='#F56565'
+    ))
+    
+    fig.update_layout(
+        barmode='group',
+        margin=dict(l=20, r=20, t=20, b=20),
+        height=250,
+        legend=dict(orientation='h', yanchor='bottom', y=-0.3, xanchor='center', x=0.5),
+        xaxis=dict(showgrid=False),
+        yaxis=dict(showgrid=True, gridcolor='#E2E8F0')
+    )
+    
+    st.plotly_chart(fig, use_container_width=True)
+    
+    # Action buttons for fraud detection
+    col_a, col_b, col_c = st.columns(3)
+    with col_a:
+        st.button("Review Alerts", use_container_width=True)
+    with col_b:
+        st.button("Update Rules", use_container_width=True)
+    with col_c:
+        st.button("Export Report", use_container_width=True)
+    
+    st.markdown('</div>', unsafe_allow_html=True)
     
     # Credit Analysis section
     st.markdown('<div class="section-title">Credit Analysis Overview</div>', unsafe_allow_html=True)
     
     with st.container():
-        st.markdown('<div class="chart-container">', unsafe_allow_html=True)
+        #st.markdown('<div class="chart-container">', unsafe_allow_html=True)
         st.markdown('<div class="chart-title">Customer Credit Score Distribution</div>', unsafe_allow_html=True)
         
         credit_data = generate_credit_data()

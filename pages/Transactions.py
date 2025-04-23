@@ -5,6 +5,9 @@ import datetime
 import plotly.express as px
 import plotly.graph_objects as go
 from math import ceil
+import os
+from dotenv import load_dotenv
+import google.generativeai as genai
 
 # Set page configuration
 st.set_page_config(
@@ -19,6 +22,15 @@ st.markdown("""
 <style>
     #MainMenu {
         visibility: hidden;
+    }
+    
+    /* Header styling */
+    .header-container {
+        background-color: #1e3a8a;
+        padding: 1.5rem;
+        border-radius: 0.5rem;
+        color: white;
+        margin-bottom: 1rem;
     }
     
     .stPagination {
@@ -134,6 +146,24 @@ st.markdown("""
         font-size: 1.2rem;
         font-weight: 600;
         color: #2D3748;
+        margin-bottom: 1rem;
+    }
+    
+    .ai-report {
+        line-height: 1.8;
+        font-family: sans-serif;
+        word-spacing: normal;
+        white-space: normal;
+    }
+
+    .ai-report p {
+        margin-bottom: 1rem;
+    }
+
+    .ai-report h2 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #0A2559;
         margin-bottom: 1rem;
     }
     
@@ -299,6 +329,102 @@ def get_customer_info(df):
         return customer_id, customer_name, customer_age
     return None, None, None
 
+def generate_ai_report(df, customer_name):
+    """
+    Generate an AI report using Google's Gemini model based on transaction data
+    """
+    try:
+        # Load environment variables
+        load_dotenv()
+        
+        # Configure the Gemini API
+        api_key = os.getenv("GEMINI_API_KEY")
+        if not api_key:
+            return "AI report generation failed: API key not found. Please check your .env file."
+        
+        genai.configure(api_key=api_key)
+        model = genai.GenerativeModel('gemini-1.5-pro')
+        
+        # Extract relevant data for the report
+        total_transactions = len(df)
+        total_amount = df["Transaction_Amount"].sum()
+        avg_amount = df["Transaction_Amount"].mean()
+        max_transaction = df["Transaction_Amount"].max()
+        credit_count = len(df[df["Transaction_Type"] == "Credit"])
+        debit_count = len(df[df["Transaction_Type"] == "Debit"])
+        credit_sum = df[df["Transaction_Type"] == "Credit"]["Transaction_Amount"].sum()
+        debit_sum = df[df["Transaction_Type"] == "Debit"]["Transaction_Amount"].sum()
+        net_balance = credit_sum - debit_sum
+        locations = df["Transaction_Location"].value_counts().to_dict()
+        
+        # Create a prompt for the AI with explicit formatting instructions
+        prompt = f"""
+        Generate a structured banking analysis report for customer {customer_name} based on the following transaction data:
+        
+        - Total Transactions: {total_transactions}
+        - Total Transaction Amount: ₹{int(total_amount)}
+        - Average Transaction Amount: ₹{int(avg_amount)}
+        - Maximum Transaction Amount: ₹{int(max_transaction)}
+        - Credit Transactions: {credit_count} totaling ₹{int(credit_sum)}
+        - Debit Transactions: {debit_count} totaling ₹{int(debit_sum)}
+        - Net Balance: ₹{int(net_balance)}
+        - Transaction Locations: {locations}
+        
+        IMPORTANT FORMATTING RULES:
+        1. Use the ₹ symbol for all currency values
+        2. Always include spaces between numbers and words
+        3. Do NOT run words together
+        4. For example, write "over the analyzed period" NOT "overtheanalyzedperiod"
+        5. Write "compared to 1 credit transaction of" NOT "comparedto1credittransactionof"
+        6. Write "The average transaction amount is" NOT "Theaverage..."
+        
+        Please organize your report in this exact format with numbering:
+        
+        ## Banking Analysis Report for {customer_name}
+        
+        #### 1. Summary:
+        [Write summary here with proper spacing between numbers and words]
+        
+        #### 2. Spending Habits & Financial Behavior:
+        [Write analysis here with proper spacing between numbers and words]
+        
+        #### 3. Loan Recommendations:
+        [Write recommendations here with proper spacing between numbers and words]
+        
+        #### 4. Notable Patterns:
+        [Write patterns here with proper spacing between numbers and words]
+        """
+        
+        # Generate the report
+        response = model.generate_content(prompt)
+        report = response.text
+        
+        # Post-process the report to fix any remaining spacing issues
+        import re
+        
+        # Fix common patterns where words run together after numbers
+        report = re.sub(r'(\d+)([a-zA-Z])', r'\1 \2', report)
+        
+        # Fix other common patterns
+        patterns = [
+            (r'over\s*the\s*analyzed\s*period', 'over the analyzed period'),
+            (r'The\s*average', 'The average'),
+            (r'compared\s*to', 'compared to'),
+            (r'resulting\s*in', 'resulting in'),
+            (r'indicates\s*a', 'indicates a'),
+            (r'with\s*an', 'with an'),
+            (r'of\s*₹', 'of ₹'),
+            (r'balance\s*of', 'balance of')
+        ]
+        
+        for pattern, replacement in patterns:
+            report = re.sub(pattern, replacement, report, flags=re.IGNORECASE)
+        
+        return report
+    
+    except Exception as e:
+        return f"AI report generation failed: {str(e)}"
+    
 def generate_transaction_type_chart(df):
     """
     Generate a pie chart of Credit vs Debit transactions
@@ -462,8 +588,12 @@ def main():
     if 'previous_search' not in st.session_state:
         st.session_state.previous_search = None
     
-    # Header
-    st.markdown('<div class="dashboard-header">Transaction Records</div>', unsafe_allow_html=True)
+    st.markdown("""
+                <div class="header-container">
+                    <h1>Transaction Records</h1>
+                    <p>Generate comprehensive financial reports with AI-powered insights and tailored recommendations</p>
+                </div>
+                """, unsafe_allow_html=True)
     
     # Description
     st.markdown("""
@@ -479,7 +609,7 @@ def main():
     df = load_data()
     
     # Search and filter section
-    st.markdown('<div class="search-container">', unsafe_allow_html=True)
+    #st.markdown('<div class="search-container">', unsafe_allow_html=True)
     st.markdown('<div class="search-title">Search & Filter Transactions</div>', unsafe_allow_html=True)
     
     # Create two columns for search and sort
@@ -505,7 +635,7 @@ def main():
             index=4  # Default to Transaction_Amount
         )
     
-    st.markdown('</div>', unsafe_allow_html=True)
+    #st.markdown('</div>', unsafe_allow_html=True)
     
     # Apply search and sort
     filtered_df = search_data(df, search_term, search_by)
@@ -542,9 +672,21 @@ def main():
             # Report Button - improved styling
             if st.button("Generate Report", type="primary", use_container_width=True):
                 st.session_state.show_report = True
-    
-    # Display charts if button is clicked and we have data
+
+    # Display AI Report and charts if button is clicked and we have data
     if st.session_state.show_report and len(filtered_df) > 0:
+        # Generate and display AI report
+        with st.spinner("Generating AI analysis..."):
+            ai_report = generate_ai_report(filtered_df, customer_name)
+            
+        st.markdown('<div class="charts-container">', unsafe_allow_html=True)
+        st.markdown('<div class="chart-title">AI-Generated Insights</div>', unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+        
+        # Let Streamlit render the markdown properly
+        st.markdown(ai_report)
+        
+        # Display the charts (existing code)
         st.markdown('<div class="charts-container">', unsafe_allow_html=True)
         
         # First row - bar chart (full width)
@@ -573,7 +715,7 @@ def main():
             st.rerun()
         
         st.markdown('</div>', unsafe_allow_html=True)
-    
+
     # Pagination
     rows_per_page = 100
     total_pages = max(1, ceil(len(sorted_df) / rows_per_page))
