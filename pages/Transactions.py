@@ -333,8 +333,12 @@ def generate_ai_report(df, customer_name):
         
         # Configure the Gemini API
         api_key = os.getenv("GEMINI_API_KEY")
+        # If not found in environment, try to get from Streamlit secrets
         if not api_key:
-            return "AI report generation failed: API key not found. Please check your .env file."
+            try:
+                api_key = st.secrets["GEMINI_API_KEY"]
+            except:
+                return "AI report generation failed: API key not found. Please add it to Streamlit secrets or environment variables."
         
         genai.configure(api_key=api_key)
         model = genai.GenerativeModel('gemini-1.5-pro')
